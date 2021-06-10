@@ -1,0 +1,6 @@
+#!/bin/bash
+
+sudo singularity run \
+    --bind $HOME/Projects/ros:/root/Projects/ros \
+    --writable $HOME/Singularity/sandbox/melodic/
+    

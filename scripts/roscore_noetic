@@ -1,0 +1,6 @@
+#!/bin/bash
+
+singularity exec \
+    -p $HOME/Singularity/sandbox/noetic/ \
+    bash -c '/ros_entrypoint.sh roscore'
+    

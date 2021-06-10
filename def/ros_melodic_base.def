@@ -1,0 +1,16 @@
+Bootstrap: docker
+From: osrf/ros:melodic-desktop-full
+Stage: build
+
+%files
+    /home/wankun/Singularity/assets/rosbashrc /
+
+%post
+    apt update
+    apt -y install vim git 
+    rosdep update
+    apt -y install python-catkin-tools python-catkin-lint python-pip
+    pip install osrf-pycommon
+
+%runscript
+    exec /bin/bash --rcfile /rosbashrc "$@"

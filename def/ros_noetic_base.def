@@ -1,0 +1,16 @@
+Bootstrap: docker
+From: osrf/ros:noetic-desktop-full
+Stage: build
+
+%files
+    /home/wankun/Singularity/assets/rosbashrc /
+
+%post
+    apt update
+    apt -y install vim git 
+    rosdep update
+    apt -y install python3-catkin-tools python3-catkin-lint python3-pip
+    pip3 install osrf-pycommon
+
+%runscript
+    exec /bin/bash --rcfile /rosbashrc "$@"

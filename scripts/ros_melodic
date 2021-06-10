@@ -1,0 +1,6 @@
+#!/bin/bash
+
+singularity run \
+    --nv \
+    $HOME/Singularity/sandbox/melodic/
+    

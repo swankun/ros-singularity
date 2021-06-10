@@ -1,0 +1,5 @@
+Bootstrap: localimage
+From: $HOME/Singularity/images/noetic.sif
+Stage: build
+
+%post

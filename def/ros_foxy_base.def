@@ -1,0 +1,8 @@
+Bootstrap: docker
+From: ros:foxy-ros-base-focal
+Stage: build
+
+%post
+    apt update && apt install -y --no-install-recommends \
+    ros-foxy-desktop=0.9.2-1* \
+    && rm -rf /var/lib/apt/lists/*
