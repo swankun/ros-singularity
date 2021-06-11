@@ -2,7 +2,13 @@ Bootstrap: docker
 From: ros:foxy-ros-base-focal
 Stage: build
 
+%files
+    /home/wankun/Singularity/assets/ros2bashrc /
+
 %post
-    apt update && apt install -y --no-install-recommends \
-    ros-foxy-desktop=0.9.2-1* \
-    && rm -rf /var/lib/apt/lists/*
+    apt update && apt install -y --no-install-recommends ros-foxy-desktop=0.9.2-1*
+    rm -rf /var/lib/apt/lists/*
+    apt install -y python3-argcomplete
+
+%runscript
+    exec /bin/bash --rcfile /ros2bashrc "$@"

@@ -1,0 +1,6 @@
+#!/bin/bash
+
+sudo singularity run \
+    --bind $HOME/Projects/ros2:/root/Projects/ros2 \
+    --writable $HOME/Singularity/sandbox/foxy/
+    
