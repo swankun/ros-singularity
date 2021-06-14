@@ -1,0 +1,11 @@
+#!/bin/bash
+
+if [[ $1 == "-w" ]]; then
+	sudo singularity run \
+		--bind $HOME/Projects/:/root/ \
+		--writable $HOME/Singularity/sandbox/foxy 
+elif [[ $1 == "" ]]; then
+	singularity run --nv $HOME/Singularity/sandbox/foxy
+else
+	echo "Usage: ros2 [optional -w for writable]"
+fi

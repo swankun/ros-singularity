@@ -1,0 +1,11 @@
+#!/bin/bash
+
+if [[ $1 == "-w" ]]; then
+	sudo singularity run \
+		--bind $HOME/Projects/:/root/ \
+		--writable $HOME/Singularity/sandbox/noetic 
+elif [[ $1 == "" ]]; then
+	singularity run --nv $HOME/Singularity/sandbox/noetic
+else
+	echo "Usage: ros [optional -w for writable]"
+fi
