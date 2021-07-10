@@ -2,21 +2,37 @@ Bootstrap: docker
 From: osrf/ros:noetic-desktop-full
 Stage: build
 
-%files
-    /home/wankun/Singularity/assets/rosbashrc /
-
 %post -c /bin/bash
-    CUSTOM_ENV=/.singularity.d/env/99-zz_custom_env.sh
-    cat >$CUSTOM_ENV <<EOF
+    # Create custom prompt
+	CUSTOM_PROMPT=/.singularity.d/env/99-custom_prompt.sh
+	cat >$CUSTOM_PROMPT <<'EOF'
 #!/bin/bash
-PS1='${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@[ros-$ROS_DISTRO]\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
+PS1='${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@[ros-container]\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
 EOF
-    chmod 755 $CUSTOM_ENV
-    apt update
-    apt -y install vim git 
-    rosdep update
-    apt -y install python3-catkin-tools python3-catkin-lint python3-pip
-    pip3 install osrf-pycommon
+	chmod 755 $CUSTOM_PROMPT
+
+	# Bash RC (ROS)
+	ROSBASHRC=/.rosbashrc
+	cat >$ROSBASHRC <<'EOF'
+alias ls='ls --color=auto'
+alias grep='grep --color=auto'
+alias ll='ls -lFh'
+alias lla='ls -alFh'
+alias sws='source devel/setup.bash'
+
+source "/opt/ros/$ROS_DISTRO/setup.bash"
+export ROSCONSOLE_FORMAT='${logger}: ${message}'
+EOF
+
+    apt update && apt install -y --no-install-recommends \
+        vim \
+        git \
+        python3-catkin-tools \
+        python3-catkin-lint \
+        python3-pip \
+    && rm -rf /var/lib/apt/lists*
+    rosdep update --rosdistro $ROSDISTRO
+    pip3 install --no-cache-dir osrf-pycommon
 
 %runscript
-    exec /bin/bash --rcfile /rosbashrc "$@"
+    exec /bin/bash --rcfile /.rosbashrc "$@"
