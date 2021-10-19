@@ -1,0 +1,86 @@
+Bootstrap: docker
+From: osrf/ros:galactic-desktop
+Stage: build
+
+%post -c /bin/bash
+	apt update && apt install -y --no-install-recommends git
+	git config --global credential.helper cache
+	
+	# Custom shell prompt
+	CUSTOM_ENV=/.singularity.d/env/99-shell_prompt.sh
+	cat >$CUSTOM_ENV <<EOF
+#!/bin/bash
+PS1='${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@[ros-galactic]\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
+EOF
+	chmod 755 $CUSTOM_ENV
+
+	# BASHRC FILE (ROS)
+	ROSBASHRC=/.rosbashrc
+	cat >$ROSBASHRC <<'EOF'
+alias ls='ls --color=auto'
+alias grep='grep --color=auto'
+alias ll='ls -lFh'
+alias lla='ls -alFh'
+alias sws='source install/local_setup.bash'
+source "/opt/ros/$ROS_DISTRO/setup.bash"
+EOF
+
+	# Remove unused Docker files
+	rm /ros_entrypoint.sh
+
+	# Install dependencies
+	export DEBIAN_FRONTEND=noninteractive
+	apt update
+	apt install -y --no-install-recommends \
+		wget \
+		python3-pip \
+		lsb-release \
+		gnupg \
+		curl \
+		python3-vcstool \
+		python3-colcon-common-extensions \
+		git
+	sh -c 'echo "deb http://packages.osrfoundation.org/gazebo/ubuntu-stable `lsb_release -cs` main" > /etc/apt/sources.list.d/gazebo-stable.list'  && \
+		wget http://packages.osrfoundation.org/gazebo.key -O - | apt-key add -  && \
+		apt update && \
+		apt install -y --no-install-recommends libignition-gazebo6-dev
+	rosdep update --rosdistro $ROS_DISTRO
+	apt install -y --no-install-recommends \
+		vim \
+		build-essential \
+		cmake \
+		git \
+		libbullet-dev \
+		python3-flake8 \
+		python3-pip \
+		python3-pytest-cov \
+		python3-rosdep \
+		python3-setuptools \
+		clang-format-10
+	python3 -m pip install -U \
+		argcomplete \
+		flake8-blind-except \
+		flake8-builtins \
+		flake8-class-newline \
+		flake8-comprehensions \
+		flake8-deprecated \
+		flake8-docstrings \
+		flake8-import-order \
+		flake8-quotes \
+		pytest-repeat \
+		pytest-rerunfailures \
+		pytest
+
+	# ROSWorld 2021 packages
+	mkdir /workspace && cd /workspace
+	git clone https://github.com/ros-planning/moveit2.git -b main
+	for repo in moveit2/moveit2.repos $(f="moveit2/moveit2_$ROS_DISTRO.repos"; test -r $f && echo $f); do vcs import < "$repo"; done
+	git clone https://github.com/hello-robot/stretch_ros2.git -b ros_world2021
+	vcs import < stretch_ros2/stretch_ros2.repos
+	export IGNITION_VERSION=fortress
+	rosdep install -r --from-paths . --ignore-src --rosdistro $ROS_DISTRO -y
+	cd / && rm -r /workspace
+
+%runscript
+	exec /bin/bash --rcfile /.rosbashrc "$@"
+
