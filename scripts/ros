@@ -1,11 +1,10 @@
 #!/bin/bash
 
-if [[ $1 == "-w" ]]; then
-	sudo singularity run \
-		--bind $HOME/Projects/:/root/ \
-		--writable $HOME/Singularity/sandbox/noetic 
-elif [[ $1 == "" ]]; then
-	singularity run --nv $HOME/Singularity/sandbox/noetic
+source /opt/containers/bin/common.bash
+sif_path="/opt/containers/ros/noetic"
+
+if [[ $1 == "-e" ]]; then
+  exec_ros_container $sif_path ${@:2}
 else
-	echo "Usage: ros [optional -w for writable]"
+  run_ros_container $sif_path
 fi

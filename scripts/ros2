@@ -1,11 +1,10 @@
 #!/bin/bash
 
-if [[ $1 == "-w" ]]; then
-	sudo singularity run \
-		--bind $HOME/Projects/:/root/ \
-		--writable $HOME/Singularity/sandbox/foxy 
-elif [[ $1 == "" ]]; then
-	singularity run --nv $HOME/Singularity/sandbox/foxy
+source /opt/containers/bin/common.bash
+sif_path="/opt/containers/ros/galactic"
+
+if [[ $1 == "-e" ]]; then
+  exec_ros_container $sif_path ${@:2}
 else
-	echo "Usage: ros2 [optional -w for writable]"
+  run_ros_container $sif_path
 fi
